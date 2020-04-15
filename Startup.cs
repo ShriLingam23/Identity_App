@@ -40,7 +40,11 @@ namespace Identity
             app.UseDeveloperExceptionPage();
             app.UseStaticFiles();
             app.UseAuthentication();
-            app.UseMvcWithDefaultRoute();
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}");
+            });
         }
     }
 }
