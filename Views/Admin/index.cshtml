@@ -4,25 +4,27 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@model User
+@model IEnumerable<AppUser>
 
-<h1 class="bg-info text-white">Create User</h1>
-<a asp-action="Index" class="btn btn-secondary">Back</a>
-<div asp-validation-summary="All" class="text-danger"></div>
+<h1 class="bg-info text-white">All Users</h1>
+<a asp-action="Create" class="btn btn-secondary">Create a User</a>
 
-<form method="post">
-    <div class="form-group">
-        <label asp-for="Name"></label>
-        <input asp-for="Name" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" class="form-control" />
-    </div>
-    <button type="submit" class="btn btn-primary">Create</button>
-</form>
-
+<table class="table table-sm table-bordered">
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Update</th>
+    </tr>
+    @foreach (AppUser user in Model)
+    {
+        <tr>
+            <td>@user.Id</td>
+            <td>@user.UserName</td>
+            <td>@user.Email</td>
+            <td>
+                <a class="btn btn-sm btn-primary" asp-action="Update" asp-route-id="@user.Id">Update</a>
+            </td>
+        </tr>
+    }
+</table>
