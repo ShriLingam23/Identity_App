@@ -15,6 +15,7 @@
         <th>Name</th>
         <th>Email</th>
         <th>Update</th>
+        <th>Delete</th>
     </tr>
     @foreach (AppUser user in Model)
     {
@@ -24,6 +25,13 @@
             <td>@user.Email</td>
             <td>
                 <a class="btn btn-sm btn-primary" asp-action="Update" asp-route-id="@user.Id">Update</a>
+            </td>
+            <td>
+                <form asp-action="Delete" asp-route-id="@user.Id" method="post">
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        Delete
+                    </button>
+                </form>
             </td>
         </tr>
     }
