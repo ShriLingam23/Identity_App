@@ -12,11 +12,15 @@ namespace Identity.Controllers
     {
         private UserManager<AppUser> userManager;
         private IPasswordHasher<AppUser> passwordHasher;
+        private IPasswordValidator<AppUser> passwordValidator;
+        private IUserValidator<AppUser> userValidator;
 
-        public AdminController(UserManager<AppUser> usrMgr, IPasswordHasher<AppUser> passwordHash)
+        public AdminController(UserManager<AppUser> usrMgr, IPasswordHasher<AppUser> passwordHash, IPasswordValidator<AppUser> passwordVal, IUserValidator<AppUser> userValid)
         {
             userManager = usrMgr;
             passwordHasher = passwordHash;
+            passwordValidator = passwordVal;
+            userValidator = userValid;
         }
 
         public IActionResult Index()
@@ -59,18 +63,37 @@ namespace Identity.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Update(string id, string email, string password)
+        public async Task<IActionResult> Update(string id, string userName,string email, string password)
         {
             AppUser user = await userManager.FindByIdAsync(id);
             if (user != null)
             {
+                if (!string.IsNullOrEmpty(userName))
+                    user.UserName = userName;
+                else
+                    ModelState.AddModelError("", "User Name cannot be empty");
+
+                IdentityResult validEmail = null;
                 if (!string.IsNullOrEmpty(email))
-                    user.Email = email;
+                {
+                    validEmail = await userValidator.ValidateAsync(userManager, user);
+                    if (validEmail.Succeeded)
+                        user.Email = email;
+                    else
+                        Errors(validEmail);
+                }
                 else
                     ModelState.AddModelError("", "Email cannot be empty");
 
+                IdentityResult validPass = null;
                 if (!string.IsNullOrEmpty(password))
-                    user.PasswordHash = passwordHasher.HashPassword(user, password);
+                {
+                    validPass = await passwordValidator.ValidateAsync(userManager, user, password);
+                    if (validPass.Succeeded)
+                        user.PasswordHash = passwordHasher.HashPassword(user, password);
+                    else
+                        Errors(validPass);
+                }
                 else
                     ModelState.AddModelError("", "Password cannot be empty");
 
