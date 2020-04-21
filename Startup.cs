@@ -46,7 +46,9 @@ namespace Identity
             .AddDefaultTokenProviders();
             services.AddMvc();
 
-            //Identity User
+            //we can configure the login redirction path, if user access a url without login
+            //By default it is /Account/Login with the url we trying to access
+            //services.ConfigureApplicationCookie(opts => opts.LoginPath = "/Authenticate/Login");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,6 +59,7 @@ namespace Identity
             app.UseStaticFiles();
             app.UseAuthentication();
             app.UseRouting();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}");
