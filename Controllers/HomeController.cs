@@ -10,7 +10,7 @@ namespace Identity.Controllers
     [Authorize]
     public class HomeController : Controller
     {
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public IActionResult Index()
         {
             return View((object)"Hello");

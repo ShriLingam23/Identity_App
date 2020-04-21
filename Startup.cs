@@ -48,7 +48,10 @@ namespace Identity
 
             //we can configure the login redirction path, if user access a url without login
             //By default it is /Account/Login with the url we trying to access
+
             //services.ConfigureApplicationCookie(opts => opts.LoginPath = "/Authenticate/Login");
+
+            // ‘/ Account/AccessDenied’ URL is the default URL set by Identity - when particular role has permission
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
