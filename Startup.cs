@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Identity.IdentityPolicy;
 using Identity.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -26,11 +27,31 @@ namespace Identity
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddTransient<IPasswordValidator<AppUser>, CustomPasswordPolicy>();
+            services.AddTransient<IUserValidator<AppUser>, CustomUsernameEmailPolicy>();
             services.AddDbContext<AppIdentityDbContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
-            services.AddIdentity<AppUser, IdentityRole>()
-                    .AddEntityFrameworkStores<AppIdentityDbContext>()
-                    .AddDefaultTokenProviders();
+            services.AddIdentity<AppUser, IdentityRole>(options =>
+            {
+                //Password Policy in Identity
+                options.Password.RequiredLength = 8;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireDigit = true;
+                //Username and Email Policy in Identity
+                options.User.RequireUniqueEmail = true;
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyz";
+            })
+            .AddEntityFrameworkStores<AppIdentityDbContext>()
+            .AddDefaultTokenProviders();
             services.AddMvc();
+
+            //we can configure the login redirction path, if user access a url without login
+            //By default it is /Account/Login with the url we trying to access
+
+            //services.ConfigureApplicationCookie(opts => opts.LoginPath = "/Authenticate/Login");
+
+            // ‘/ Account/AccessDenied’ URL is the default URL set by Identity - when particular role has permission
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,6 +62,7 @@ namespace Identity
             app.UseStaticFiles();
             app.UseAuthentication();
             app.UseRouting();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}");
