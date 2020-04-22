@@ -40,7 +40,10 @@ namespace Identity.Controllers
                 AppUser appUser = new AppUser
                 {
                     UserName = user.Name,
-                    Email = user.Email
+                    Email = user.Email,
+                    Country = user.Country,
+                    Age = user.Age,
+                    Salary = user.Salary
                 };
 
                 IdentityResult result = await userManager.CreateAsync(appUser, user.Password);
@@ -65,7 +68,7 @@ namespace Identity.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Update(string id, string userName,string email, string password)
+        public async Task<IActionResult> Update(string id, string userName,string email, string password, int age, string country, string salary)
         {
             AppUser user = await userManager.FindByIdAsync(id);
             if (user != null)
@@ -99,7 +102,17 @@ namespace Identity.Controllers
                 else
                     ModelState.AddModelError("", "Password cannot be empty");
 
-                if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password))
+                user.Age = age;
+                Country myCountry;
+                Enum.TryParse(country, out myCountry);
+                user.Country = myCountry;
+
+                if (!string.IsNullOrEmpty(salary))
+                    user.Salary = salary;
+                else
+                    ModelState.AddModelError("", "Salary cannot be empty");
+
+                if (validEmail != null && validPass != null && validEmail.Succeeded && validPass.Succeeded && !string.IsNullOrEmpty(salary))
                 {
                     IdentityResult result = await userManager.UpdateAsync(user);
                     if (result.Succeeded)
