@@ -14,10 +14,33 @@ namespace Identity.Controllers
     public class ClaimsController : Controller
     {
         private UserManager<AppUser> userManager;
+        private IAuthorizationService authService;
 
-        public ClaimsController(UserManager<AppUser> userMgr)
+        // IAuthorizationService service and is registered in the service collection within the Startup class.
+        public ClaimsController(UserManager<AppUser> userMgr, IAuthorizationService auth)
         {
             userManager = userMgr;
+            authService = auth;
+        }
+
+        [Authorize(Policy = "AspManager")]
+        public ViewResult Project() => View("Index", User?.Claims);
+
+        [Authorize(Policy = "AllowAppa")]
+        public ViewResult TomFiles() => View("Index", User?.Claims);
+
+        public async Task<IActionResult> PrivateAccess(string title)
+        {
+            // This ‘PrivateAccess’ Action method can only be invoked when the logged in user is either ‘tom’ or ‘alice’.
+            // AllowPrivateHandler class gets the ‘allowedUsers’ value from its AuthorizationHandlerContext class ‘Resource’ property.
+            string[] allowedUsers = { "appa", "sairam" };
+            AuthorizationResult authorized = await authService.AuthorizeAsync(User, allowedUsers, "PrivateAccess");
+
+            if (authorized.Succeeded)
+                return View("Index", User?.Claims);
+            else
+                return new ChallengeResult();
+                //The ‘ChallengeResult’ class initialization forces the users, other than allowed, to the login page.
         }
 
         [ActionName("Index")]
